@@ -1,5 +1,6 @@
 using TMPro;
 using UnityEngine;
+using UnityEngine.Audio;
 using UnityEngine.XR.Interaction.Toolkit.Interactors;
 
 public class SocketManager : MonoBehaviour
@@ -21,6 +22,10 @@ public class SocketManager : MonoBehaviour
 
     public ResourceManager manager;
 
+    public AudioSource audioSource;
+    public AudioClip mineralComplete;
+    public AudioClip clickerComplete;
+
     void Start()
     {
         socket = GetComponent<XRSocketInteractor>();
@@ -37,6 +42,8 @@ public class SocketManager : MonoBehaviour
     // adds one resource to the counter 
     private void addResource()
     {
+        audioSource.clip = clickerComplete;
+        audioSource.Play();
         currResource += 1;
         GameObject selectTarget = socket.GetOldestInteractableSelected().transform.gameObject;
         if (selectTarget != null && selectTarget.tag == "Mineral")
@@ -45,6 +52,8 @@ public class SocketManager : MonoBehaviour
             mineral_counterText.text = $"{currResource}/{maxResource} of {resourceName} acquired.";
             if (currResource == maxResource)
             {
+                audioSource.clip = mineralComplete;
+                audioSource.Play();
                 currGenerators += 1;
                 manager.num_mineralgenerators += 1;
                 //generator_counterText.text = $"{currGenerators}/{maxGenerators} crafted.";

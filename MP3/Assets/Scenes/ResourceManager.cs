@@ -9,6 +9,8 @@ using UnityEngine.XR;
 using UnityEngine.XR.Interaction.Toolkit;
 using UnityEngine.InputSystem.XR;
 using System.Collections.Generic;
+using static UnityEngine.ParticleSystem;
+using UnityEngine.Audio;
 
 public class ResourceManager : MonoBehaviour
 {
@@ -29,6 +31,10 @@ public class ResourceManager : MonoBehaviour
 
     [Header("Tutorial Audio")]
     public AudioClip tutorialPopupClip;
+
+    [Header("Starting Audio")]
+    public AudioSource starterAudio;
+    public AudioClip[] startingSequence;
 
     [Header("Cooldown UI Bars")]
     public Image mineralBar;
@@ -160,6 +166,8 @@ public class ResourceManager : MonoBehaviour
         {
             currentMinerals += 1;
         };
+
+        StartCoroutine(PlayAudioSequence(starterAudio, startingSequence));
     }
     void Update()
     {
@@ -407,7 +415,10 @@ public class ResourceManager : MonoBehaviour
 
                 mineralCooldown = actionCooldownDuration;
                 TriggerCooldownStart(ref mineralCooldown, mineralBar);
-                TriggerHaptics(mineralRate); 
+                TriggerHaptics(mineralRate);
+
+                changeParticleEmitter(mineral_generatorParent, 5f, 20f);
+
                 Debug.Log("Mineral Generator bought!");
             } 
             else if (num_mineralgenerators == 1 && door1.doorOpened)
@@ -422,6 +433,8 @@ public class ResourceManager : MonoBehaviour
                 mineralCooldown = actionCooldownDuration;
                 TriggerCooldownStart(ref mineralCooldown, mineralBar);
                 TriggerHaptics(mineralRate);
+
+                changeParticleEmitter(mineral_generatorParent, 12f, 40f);
                 Debug.Log("Mineral Generator bought!");
             }
             else if (num_mineralgenerators == 2 && door2.doorOpened)
@@ -436,9 +449,30 @@ public class ResourceManager : MonoBehaviour
                 mineralCooldown = actionCooldownDuration;
                 TriggerCooldownStart(ref mineralCooldown, mineralBar);
                 TriggerHaptics(mineralRate);
+
+                changeParticleEmitter(mineral_generatorParent, 30f, 70f);
                 Debug.Log("Mineral Generator bought!");
             }
 
+        }
+    }
+
+    public void changeParticleEmitter(GameObject[] parent, float speed, float rate)
+    {
+        foreach (GameObject child in parent)
+        {
+            if (child != null)
+            {
+                ParticleSystem particleSystem = child.GetComponentInChildren<ParticleSystem>();
+                if (particleSystem != null)
+                {
+                    var main = particleSystem.main;
+                    main.startSpeed = speed;
+
+                    var emission = particleSystem.emission;
+                    emission.rateOverTime = rate;
+                }
+            }
         }
     }
 
@@ -462,6 +496,8 @@ public class ResourceManager : MonoBehaviour
                 energyCooldown = actionCooldownDuration;
                 TriggerCooldownStart(ref energyCooldown, energyBar);
                 TriggerHaptics(energyRate);
+
+                changeParticleEmitter(energy_generatorParent, 5f, 20f); ;
                 Debug.Log("Energy Generator deployed!");
             }
             else if (num_energygenerators == 1 && door1.doorOpened)
@@ -475,6 +511,7 @@ public class ResourceManager : MonoBehaviour
                 energyCooldown = actionCooldownDuration;
                 TriggerCooldownStart(ref energyCooldown, energyBar);
                 TriggerHaptics(energyRate);
+                changeParticleEmitter(energy_generatorParent, 12f, 40f);
                 Debug.Log("Energy Generator deployed!");
             }
             else if (num_energygenerators == 2 && door2.doorOpened)
@@ -488,6 +525,7 @@ public class ResourceManager : MonoBehaviour
                 energyCooldown = actionCooldownDuration;
                 TriggerCooldownStart(ref energyCooldown, energyBar);
                 TriggerHaptics(energyRate);
+                changeParticleEmitter(energy_generatorParent, 30f, 70f);
                 Debug.Log("Energy Generator deployed!");
             }
         }
@@ -579,6 +617,17 @@ public class ResourceManager : MonoBehaviour
                 bar.color = Color.gray;
             }
             // If hasEverCooled and not wasCooling — do nothing, stays green ✅
+        }
+    }
+
+    IEnumerator PlayAudioSequence(AudioSource source, AudioClip[] clips)
+    {
+        foreach (AudioClip clip in clips)
+        {
+            source.clip = clip;
+            source.Play();
+
+            yield return new WaitWhile(() => source.isPlaying);
         }
     }
 }
