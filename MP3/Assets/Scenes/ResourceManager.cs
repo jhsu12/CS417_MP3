@@ -31,10 +31,15 @@ public class ResourceManager : MonoBehaviour
 
     [Header("Tutorial Audio")]
     public AudioClip tutorialPopupClip;
+    public AudioClip danger;
+    public AudioSource tablet;
 
     [Header("Starting Audio")]
     public AudioSource starterAudio;
     public AudioClip[] startingSequence;
+
+    [Header("Generator Audio")]
+    public AudioClip[] genaudios;
 
     [Header("Cooldown UI Bars")]
     public Image mineralBar;
@@ -132,6 +137,8 @@ public class ResourceManager : MonoBehaviour
     private bool deathTriggered = false;
     private bool hasShownLowOxygen = false;
 
+    private bool refilledOxygen = false;
+
     
 
     private void Start()
@@ -188,6 +195,8 @@ public class ResourceManager : MonoBehaviour
         // 2. Tutorial & Unlock Logic
         CheckForUnlocks();
 
+        dangerOxygenLow();
+
         // 3. Update the UI Text
         UpdateUIText();
 
@@ -203,6 +212,7 @@ public class ResourceManager : MonoBehaviour
 
         // 4. Keyboard Testing
         HandleKeyboardInputs();
+
     }
 
     // --- LOGIC FUNCTIONS ---
@@ -243,6 +253,16 @@ public class ResourceManager : MonoBehaviour
             SceneManager.LoadScene("Death");
         }
         
+    }
+
+    public void dangerOxygenLow()
+    {
+        if (refilledOxygen && currentOxygen <= 200)
+        {
+            tablet.clip = danger;
+            tablet.Play();
+            refilledOxygen = false;
+        }
     }
 
     IEnumerator DelayedAction()
@@ -416,7 +436,7 @@ public class ResourceManager : MonoBehaviour
                 mineralCooldown = actionCooldownDuration;
                 TriggerCooldownStart(ref mineralCooldown, mineralBar);
                 TriggerHaptics(mineralRate);
-
+                
                 changeParticleEmitter(mineral_generatorParent, 5f, 20f);
 
                 Debug.Log("Mineral Generator bought!");
@@ -540,6 +560,7 @@ public class ResourceManager : MonoBehaviour
         }
         if (currentMinerals >= oxygenRefillCost)
         {
+            refilledOxygen = true;
             currentMinerals -= oxygenRefillCost;
             currentOxygen = Mathf.Min(currentOxygen + oxygenRefillAmount, maxOxygen);
 
@@ -552,10 +573,12 @@ public class ResourceManager : MonoBehaviour
 
     void SpawnGenerators(GameObject[] parent, GameObject[] pad_parent, int count)
     {
-    GameObject child = parent[count - 1];
-    GameObject child_pad = pad_parent[count - 1];
-    StartCoroutine(EaseInGenerator(child));
-    child_pad.gameObject.SetActive(false);
+        GameObject child = parent[count - 1];
+        GameObject child_pad = pad_parent[count - 1];
+        StartCoroutine(EaseInGenerator(child));
+        child_pad.gameObject.SetActive(false);
+        child.GetComponent<AudioSource>().clip = genaudios[count - 1];
+        child.GetComponent<AudioSource>().Play();
     }
 
     // private IEnumerator ClearTutorialAfterDelay()
@@ -631,7 +654,7 @@ public class ResourceManager : MonoBehaviour
         }
     }
 
-    IEnumerator EaseInGenerator(GameObject obj)
+    public IEnumerator EaseInGenerator(GameObject obj)
 {
     obj.SetActive(true);
     Vector3 targetScale = obj.transform.localScale;

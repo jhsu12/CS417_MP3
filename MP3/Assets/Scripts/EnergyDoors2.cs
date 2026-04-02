@@ -24,6 +24,8 @@ public class EnergyDoor2 : MonoBehaviour
     public AudioSource doorAudioSource;
     public AudioClip doorOpenSound;
 
+    public AudioClip completedGame;
+
     void Start()
     {
         leftClosed = leftDoor.localPosition;
@@ -54,6 +56,8 @@ public class EnergyDoor2 : MonoBehaviour
                 doorOpened = true;
                 PlayDoorSound();
                 Debug.Log("Door unlocked!");
+                doorAudioSource.clip = completedGame;
+                doorAudioSource.Play();
             }
         }
 

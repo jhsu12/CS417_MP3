@@ -60,6 +60,7 @@ public class SocketManager : MonoBehaviour
                 int gen_i = (int)currGenerators - 1;
                 Transform child = generatorParent.transform.GetChild(gen_i);
                 Transform child_pad = padParent.transform.GetChild(gen_i);
+                StartCoroutine(manager.EaseInGenerator(child.gameObject));
                 child.gameObject.SetActive(true);
                 child_pad.gameObject.SetActive(false);
 
