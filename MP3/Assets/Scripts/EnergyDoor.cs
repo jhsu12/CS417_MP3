@@ -19,10 +19,20 @@ public class EnergyDoor : MonoBehaviour
     public int doornum;
     public EnergyDoor2 door1;
 
+    [Header("Juicy Sound")]
+    public AudioSource doorAudioSource; // drag in an AudioSource on this GameObject
+    public AudioClip doorOpenSound;     // drag in your sound clip
+
     void Start()
     {
         leftClosed = leftDoor.localPosition;
         rightClosed = rightDoor.localPosition;
+
+        if (doorAudioSource != null)
+        {
+            doorAudioSource.spatialBlend = 1f;  // fully 3D spatialized
+            doorAudioSource.playOnAwake = false;
+        }
     }
 
     void Update()
@@ -32,6 +42,7 @@ public class EnergyDoor : MonoBehaviour
             if (!doorOpened && resourceManager.currentEnergy >= requiredEnergy && door1.doorOpened)
             {
                 doorOpened = true;
+                PlayDoorSound();
                 Debug.Log("Door unlocked!");
             }
         }
@@ -49,6 +60,15 @@ public class EnergyDoor : MonoBehaviour
                 rightClosed - rightDoor.right * openDistance,
                 Time.deltaTime * openSpeed
             );
+        }
+    }
+
+    void PlayDoorSound()
+    {
+        if (doorAudioSource != null && doorOpenSound != null)
+        {
+            doorAudioSource.clip = doorOpenSound;
+            doorAudioSource.Play();
         }
     }
 }

@@ -552,10 +552,10 @@ public class ResourceManager : MonoBehaviour
 
     void SpawnGenerators(GameObject[] parent, GameObject[] pad_parent, int count)
     {
-        GameObject child = parent[count-1];
-        GameObject child_pad = pad_parent[count - 1];
-        child.gameObject.SetActive(true);
-        child_pad.gameObject.SetActive(false);
+    GameObject child = parent[count - 1];
+    GameObject child_pad = pad_parent[count - 1];
+    StartCoroutine(EaseInGenerator(child));
+    child_pad.gameObject.SetActive(false);
     }
 
     // private IEnumerator ClearTutorialAfterDelay()
@@ -630,4 +630,20 @@ public class ResourceManager : MonoBehaviour
             yield return new WaitWhile(() => source.isPlaying);
         }
     }
+
+    IEnumerator EaseInGenerator(GameObject obj)
+{
+    obj.SetActive(true);
+    Vector3 targetScale = obj.transform.localScale;
+    obj.transform.localScale = Vector3.zero;
+
+    while (Vector3.Distance(obj.transform.localScale, targetScale) > 0.01f)
+    {
+        // v = k * (goal - x) * dt
+        obj.transform.localScale += 6f * (targetScale - obj.transform.localScale) * Time.deltaTime;
+        yield return null;
+    }
+
+    obj.transform.localScale = targetScale;
+}
 }
